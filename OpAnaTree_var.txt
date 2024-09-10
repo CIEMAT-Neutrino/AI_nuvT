@@ -1,0 +1,60 @@
+### Event and Identification Variables:
+- **`eventID`**: The unique identifier for a particular event (interaction or triggered readout) in the detector.
+- **`runID`**: Identifier for the run during which the event was recorded. A run is a specific period during which the detector collects data.
+- **`subrunID`**: A further subdivision of a run, useful for managing large data sets or specific calibration periods within a run.
+
+### Neutrino Interaction Variables:
+- **`nuvX`, `nuvY`, `nuvZ`, `nuvT`**: The position (`X`, `Y`, `Z`) and time (`T`) of the neutrino interaction vertex. This is where the neutrino is believed to have interacted with the argon nucleus.
+- **`nuvE`**: The energy of the incoming neutrino at the interaction vertex.
+
+### Particle Track and Energy Deposition Variables:
+- **`stepX`, `stepY`, `stepZ`, `stepT`**: The position and time for each step of a particle’s track through the detector, likely as it deposits energy in the LArTPC.
+- **`dE`**: The energy deposited in a single step, potentially along a track in the detector.
+- **`energydep`, `energydepX`, `energydepY`, `energydepZ`**: The total energy deposited and the components of energy deposition in the `X`, `Y`, and `Z` directions.
+- **`E`**: The total energy of a particle, possibly after summing up all energy depositions or the total energy of a particle at a specific point.
+
+### Momentum Variables:
+- **`StartPx`, `StartPy`, `StartPz`**: The momentum components of a particle at the start of its trajectory in the detector.
+- **`EndPx`, `EndPy`, `EndPz`**: The momentum components of a particle at the end of its trajectory.
+
+### Process and Particle Identification:
+- **`process`**: Describes the type of interaction or physical process (e.g., ionization, scattering) that occurred at a specific step.
+- **`trackID`**: A unique identifier for a particle’s track within the event.
+- **`motherID`**: The track ID of the particle that produced this particle, useful for understanding decay chains or secondary interactions.
+- **`PDGcode`**: The Particle Data Group (PDG) code identifying the particle type (e.g., electron, muon, proton).
+
+### Cosmics and Energy Deposition in TPC:
+- **`InTimeCosmics`**: A flag or indicator of whether the event or particle track is associated with a cosmic ray background that coincides with the neutrino interaction timing.
+- **`InTimeCosmicsTime`**: The time associated with the detected cosmic event.
+- **`dEtpc`, `dEpromx`, `dEpromy`, `dEpromz`**: Energy deposition variables, potentially indicating how much energy was deposited in the TPC (Time Projection Chamber) or in specific regions within the detector, with `prom` possibly referring to a specific region or characteristic.
+- **`dEspreadx`, `dEspready`, `dEspreadz`**: Likely related to the spread of energy deposition in the `X`, `Y`, and `Z` directions, indicating how widely the energy is dispersed.
+
+### Photon and Optical Detection Variables:
+- **`SimPhotonsperOpChVUV`, `SimPhotonsperOpChVIS`**: The number of simulated photons detected per optical channel in the vacuum ultraviolet (VUV) and visible (VIS) spectra, respectively.
+- **`NPhotons`**: The total number of photons generated or detected.
+- **`NPhotonsPMTCo`, `NPhotonsPMTUnco`**: The number of photons detected by PMTs (Photomultiplier Tubes), potentially differentiated by whether they are coincident (Co) or uncoincident (Unco) with other signals.
+- **`SimPhotonsLiteVUV`, `SimPhotonsLiteVIS`**: A more lightweight or simplified representation of the simulated photons in the VUV and VIS spectra.
+- **`NPhotonsXARAPUCAVUV`, `NPhotonsXARAPUCAVIS`**: The number of photons detected by the XARAPUCA (a type of optical detector) in the VUV and VIS spectra.
+
+### Optical Hit and Flash Variables:
+- **`nophits`**: The number of optical hits detected in the event.
+- **`ophit_opch`**: The optical channel where a particular optical hit was recorded.
+- **`ophit_peakT`, `ophit_startT`, `ophit_riseT`**: Timing information for an optical hit, including the time of the peak signal, start time, and rise time.
+- **`ophit_width`**: The width of the optical hit signal.
+- **`ophit_area`**: The integrated area under the optical hit signal, related to the total detected light.
+- **`ophit_amplitude`**: The peak amplitude of the optical hit signal.
+- **`ophit_pe`**: The number of photoelectrons detected in an optical hit, often used as a measure of the light yield.
+
+### Flash Variables (Clusters of Optical Hits):
+- **`nopflash`**: The number of optical flashes detected in the event.
+- **`flash_id`**: An identifier for each flash.
+- **`flash_time`**: The time associated with the flash.
+- **`flash_total_pe`**: The total number of photoelectrons detected in the flash.
+- **`flash_pe_v`**: The distribution of photoelectrons across different channels for the flash.
+- **`flash_tpc`**: The TPC associated with the flash, in detectors with multiple TPCs.
+- **`flash_y`, `flash_yerr`**: The `Y` position of the flash and its associated uncertainty.
+- **`flash_z`, `flash_zerr`**: The `Z` position of the flash and its associated uncertainty.
+- **`flash_x`, `flash_xerr`**: The `X` position of the flash and its associated uncertainty.
+- **`flash_ophit_time`, `flash_ophit_risetime`, `flash_ophit_starttime`**: Timing information related to the optical hits within a flash.
+- **`flash_ophit_amp`, `flash_ophit_area`, `flash_ophit_width`, `flash_ophit_pe`**: Similar to the `ophit_*` variables, these describe the amplitude, area, width, and number of photoelectrons for the hits associated with the flash.
+- **`flash_ophit_ch`**: The optical channels involved in the flash.
