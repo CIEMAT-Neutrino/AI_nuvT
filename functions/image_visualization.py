@@ -24,7 +24,7 @@ def image_visualization(image, event_index, cell_size):
     
     for i in range(num_rows):
         for j in range(num_columns):
-            axs[i, j].imshow(image[event_index[i], :, :, j])
+            axs[i, j].imshow(image[event_index[i], :, :, j], cmap='BuPu')
     
     plt.setp(axs, xticks=[], yticks=[])
     plt.show()
