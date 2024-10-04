@@ -32,3 +32,4 @@ from functions.image_visualization import image_visualization
 from functions.split_train_test import split_train_test
 from functions.create_cnn_model import create_cnn_model
 from functions.train_and_predict import train_and_predict
+from functions.image_visualization import image_visualization
