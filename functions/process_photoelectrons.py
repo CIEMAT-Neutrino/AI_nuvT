@@ -14,28 +14,28 @@ def process_photoelectrons(hit_PE, hit_ch, hit_t, n_canales=312):
     tuple: Two numpy arrays containing the number of photoelectrons and the weighted times.
     """
 
-    n_eventos = len(hit_ch)
+    n_events = len(hit_ch)
 
     # Create matrices to store the number of photoelectrons and times for each event and channel
-    fotoelectrones = np.zeros((n_eventos, n_canales))
-    tiempos = np.zeros((n_eventos, n_canales))
+    pe_matrix = np.zeros((n_events, n_canales))
+    time_matrix = np.zeros((n_events, n_canales))
 
     # Populate the matrices
-    for i in range(n_eventos):
+    for i in range(n_events):
         for j in range(len(hit_PE[i])):
             for k, l, t in zip(hit_PE[i][j], hit_ch[i][j], hit_t[i][j]):
-                fotoelectrones[i][l] += k
-                tiempos[i][l] += k * t  # Weight times by charge
+                pe_matrix[i][l] += k
+                time_matrix[i][l] += k * t  # Weight times by charge
 
-    # Normalize tiempos using the sum of weights
-    for i in range(n_eventos):
+    # Normalize time_matrix using the sum of weights
+    for i in range(n_events):
         for j in range(n_canales):
-            if fotoelectrones[i][j] != 0:
-                tiempos[i][j] /= fotoelectrones[i][j]
+            if pe_matrix[i][j] != 0:
+                time_matrix[i][j] /= pe_matrix[i][j]
             else:
-                tiempos[i][j] = 0
+                time_matrix[i][j] = 0
 
-    return fotoelectrones, tiempos
+    return pe_matrix, time_matrix
 
 # Example usage
-# fotoelectrones, tiempos = process_photoelectrons(hit_PE, hit_ch, hit_t)
+# pe_matrix, time_matrix = process_photoelectrons(hit_PE, hit_ch, hit_t)
