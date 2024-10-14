@@ -77,39 +77,45 @@ def sample_awkward_arrays(awkward_arrays, sample_size=100000, chunk_size=10000):
     return np.array(sampled_data[:sample_size])  # Ensure we return exactly the sample size
 
 
-def plot_variable_histograms(hit_nuvT_filtered, hit_t_filtered, hit_ch_filtered):
 
-    #Plot nuvT accumulative
+def plot_variable_histograms(hit_nuvT_filtered, hit_t_filtered, hit_ch_filtered):
+    # Flatten the data
     flattened_hit_nuvT_filtered = ak.flatten(ak.Array(hit_nuvT_filtered))
     flattened_hit_t_filtered = sample_awkward_arrays(hit_t_filtered)
     flattened_hit_ch_filtered = sample_awkward_arrays(hit_ch_filtered)
 
     # Create subplots with 3 rows and 1 column
     fig, axs = plt.subplots(3, 1, figsize=(20, 25))
+    fig.subplots_adjust(hspace=0.4)  # Adjust spacing between subplots
 
     # First histogram: nuvT
-    axs[0].hist(flattened_hit_nuvT_filtered, bins=100, edgecolor='black')
-    axs[0].set_xlabel('time [ns]')
-    axs[0].set_ylabel('Frequency')
-    axs[0].set_title('nuvT')
+    axs[0].hist(flattened_hit_nuvT_filtered, bins=300, edgecolor='black', alpha=0.7)
+    axs[0].set_xlabel('Time [ns]', fontsize=14)
+    axs[0].set_ylabel('# OpHits', fontsize=14)
+    axs[0].set_title('NuvT Histogram', fontsize=16, fontweight='bold')
+    axs[0].grid(axis='y', linestyle='--', alpha=0.7)  # Add grid lines for better readability
 
     # Second histogram: ophit_time
-    axs[1].hist(flattened_hit_t_filtered, bins=300, edgecolor='black')
-    axs[1].set_xlabel(r'Time [$\mu$s]')
-    axs[1].set_ylabel('Frequency')
-    axs[1].set_title('ophit_time')
+    axs[1].hist(flattened_hit_t_filtered, bins=300, edgecolor='black', alpha=0.7)
+    axs[1].set_xlabel(r'Time [$\mu$s]', fontsize=14)
+    axs[1].set_ylabel('# OpHits', fontsize=14)
+    axs[1].set_title('Ophit Time Histogram', fontsize=16, fontweight='bold')
     axs[1].set_xlim(0, 15)  # Set x-axis limits
+    axs[1].grid(axis='y', linestyle='--', alpha=0.7)
 
     # Third histogram: channel distribution
-    axs[2].hist(flattened_hit_ch_filtered, bins=range(0, 312), edgecolor='black')
-    axs[2].set_xlabel('# channel')
-    axs[2].set_ylabel('Frequency')
-    axs[2].set_title('channel dist.')
+    axs[2].hist(flattened_hit_ch_filtered, bins=range(0, 312), edgecolor='black', alpha=0.7)
+    axs[2].set_xlabel('# Channel', fontsize=14)
+    axs[2].set_ylabel('# OpHits', fontsize=14)
+    axs[2].set_title('Channel Distribution Histogram', fontsize=16, fontweight='bold')
     axs[2].set_xticks(range(0, 312, 10))
     axs[2].set_xlim(0, 312)  # Set x-axis limits
     axs[2].set_ylim(0, 1000)  # Set y-axis limits
+    axs[2].grid(axis='y', linestyle='--', alpha=0.7)
 
     # Display the plot
     plt.show()
+
+
 
 

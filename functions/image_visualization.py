@@ -18,7 +18,10 @@ def image_visualization(image, event_index, cell_size):
     # Calcular el tamaño de la figura basado en el número de filas y columnas
     figsize = (cell_size[1] * num_columns, cell_size[0] * num_rows)
 
-    print('C1: Visible/Volumen -  ||  C2: Visible/Volumen +  ||  C3: Ultravioleta/Volumen -  ||  C4: Ultravioleta/Volumen +  ||  T1: Visible/Volumen -  ||  T2: Visible/Volumen +  ||  T3: Ultravioleta/Volumen -  ||  T4: Ultravioleta/Volumen +')
+    print("PE1: Visible/Volume -", "PE2: Visible/Volume +", 
+    "PE3: Ultraviolet/Volume -", "PE4: Ultraviolet/Volume +", 
+    "T1: Visible/Volume -", "T2: Visible/Volume +", 
+    "T3: Ultraviolet/Volume -", "T4: Ultraviolet/Volume +")
     
     fig, axs = plt.subplots(num_rows, num_columns, figsize=figsize)
     

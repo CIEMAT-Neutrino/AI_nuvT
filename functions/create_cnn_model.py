@@ -21,19 +21,19 @@ def create_cnn_model(x_train):
     model = layers.Conv2D(128, (3, 3), padding='same')(model)
     model = layers.LeakyReLU(alpha=0.1)(model)
     model = layers.MaxPooling2D((2, 2), padding='same')(model)
-    model = layers.Dropout(0.3)(model)
+    model = layers.Dropout(0.1)(model)
     
     # Second convolutional block
     model = layers.Conv2D(256, (3, 3), padding='same')(model)
     model = layers.LeakyReLU(alpha=0.1)(model)
     model = layers.MaxPooling2D((2, 2), padding='same')(model)
-    model = layers.Dropout(0.3)(model)
+    model = layers.Dropout(0.1)(model)
     
     # Third convolutional block
     model = layers.Conv2D(512, (3, 3), padding='same')(model)
     model = layers.LeakyReLU(alpha=0.1)(model)
     model = layers.MaxPooling2D((2, 2), padding='same')(model)
-    model = layers.Dropout(0.4)(model)
+    model = layers.Dropout(0.1)(model)
     
     # Flatten the output and pass through dense layers
     model = layers.Flatten()(model)
