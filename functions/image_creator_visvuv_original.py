@@ -1,6 +1,6 @@
 import numpy as np
 
-def image_creator2(pe_matrix, time_matrix, vis_map, vuv_map):
+def image_creator_origin(pe_matrix, time_matrix, vis_map, vuv_map):
  
   # Creamos la matriz con distribución espacial
   ch_z, ch_y = vis_map.shape
