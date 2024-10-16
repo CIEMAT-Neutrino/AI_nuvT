@@ -22,7 +22,7 @@ def plot_flash_time_distribution(flattened_data, bins=100, xlim=None, xticks=Non
     plt.hist(flattened_data, bins=bins, color='orange')
     
     plt.xlabel(r'time [$\mu$s]')
-    plt.ylabel('nº flashes')
+    plt.ylabel('# flashes')
     plt.title('Flash time distribution')
     
     if xlim:
