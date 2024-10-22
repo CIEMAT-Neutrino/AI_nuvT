@@ -1,8 +1,7 @@
 *.csv
 *.npy
-
-# Ignorar la carpeta __pycache__
+*.pyc
+*.parquet
 __pycache__/
 
-# Ignorar archivos .pyc
-*.pyc
+

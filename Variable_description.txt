@@ -1,3 +1,9 @@
+**Some keys doesn't work:**
+
+Keys in optree: ['dE', 'energydep', 'energydepX', 'energydepY', 'energydepZ', 'InTimeCosmics', 'InTimeCosmicsTime',...
+ 'dEtpc', 'dEpromx', 'dEpromy', 'dEpromz', 'dEspreadx', 'dEspready', 'dEspreadz', 'dElowedges', 'dEmaxedges']
+
+
 ### Event and Identification Variables:
 - **`eventID`**: The unique identifier for a particular event (interaction or triggered readout) in the detector.
 - **`runID`**: Identifier for the run during which the event was recorded. A run is a specific period during which the detector collects data.
