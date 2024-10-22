@@ -5,6 +5,8 @@ import os
 import statistics as st
 import collections
 from random import randint
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 #import visualkeras
 from sklearn.metrics import mean_squared_error
@@ -28,7 +30,7 @@ from functions.plot_histograms import plot_flash_time_distribution, sample_awkwa
 from functions.process_photoelectrons import process_photoelectrons
 from functions.image_creator import image_creator_gen
 from functions.image_creator_visvuv_original import image_creator_origin
-from functions.image_visualization import image_visualization
+from functions.image_visualization import image_visualization, plot_image_4comp
 from functions.split_train_test import split_train_test
 from functions.create_cnn_model import create_cnn_model
 from functions.train_and_predict import train_and_predict
