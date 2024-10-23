@@ -133,7 +133,7 @@ def plot_image(image_data, event_idx, labels, groups, grid, figsize=(26, 10), us
     
     plt.tight_layout()
     
-    return fig, axs
+    plt.show()
 
 # Example usage:
 # Basic usage
