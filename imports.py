@@ -10,6 +10,7 @@ import pyarrow.parquet as pq
 
 #import visualkeras
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 
 #typical libraries
 import matplotlib.pyplot as plt
