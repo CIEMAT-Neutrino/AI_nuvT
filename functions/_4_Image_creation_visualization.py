@@ -4,6 +4,8 @@ from matplotlib.colors import LogNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
+import numpy as np
+
 def image_creator_gen(pe_matrix, time_matrix, *maps):
     """
     Generalized function to create an image based on an arbitrary number of maps.
@@ -22,17 +24,28 @@ def image_creator_gen(pe_matrix, time_matrix, *maps):
     pe_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
     time_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
 
-    # Process each map
+    # Process each map and normalize separately for two groups
     for idx, map_ in enumerate(maps):
         valid_map = (map_ >= 0) & (map_ < pe_matrix.shape[1])
         
+        # Process each event for the current map
         for i in range(n_events):
             pe_matrices_map[idx][i][valid_map] = pe_matrix[i][map_[valid_map]]
             time_matrices_map[idx][i][valid_map] = time_matrix[i][map_[valid_map]]
 
-    # Normalize matrices and split them
-    pe_matrices_map = [np.hsplit(pe_mat, 2) / np.max(pe_matrix) for pe_mat in pe_matrices_map]
-    time_matrices_map = [np.hsplit(time_mat, 2) / np.max(time_matrix) for time_mat in time_matrices_map]
+        #NEW NORMALIZATION
+
+        # Normalize the first two maps (first eight channels) separately from the last two
+        if idx < 2:  # First group
+            pe_matrices_map[idx] /= np.max(pe_matrices_map[:2])
+            time_matrices_map[idx] /= np.max(time_matrices_map[:2])
+        else:  # Second group
+            pe_matrices_map[idx] /= np.max(pe_matrices_map[2:])
+            time_matrices_map[idx] /= np.max(time_matrices_map[2:])
+
+    # Split and scale matrices for each map
+    pe_matrices_map = [np.hsplit(pe_mat, 2) for pe_mat in pe_matrices_map]
+    time_matrices_map = [np.hsplit(time_mat, 2) for time_mat in time_matrices_map]
 
     # Create the final image with 2 channels per map (photoelectrons and time)
     image = np.zeros((n_events, int(ch_z / 2), ch_y, 2 * map_count * 2))
@@ -47,6 +60,7 @@ def image_creator_gen(pe_matrix, time_matrix, *maps):
         channel += 4
 
     return image
+
 
 
 def plot_image(image_data, event_idx, labels, groups, grid, figsize=(26, 10), use_log_scale=False, show_colorbar=False):

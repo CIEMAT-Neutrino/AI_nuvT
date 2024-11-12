@@ -7,6 +7,7 @@ import collections
 from random import randint
 import pyarrow as pa
 import pyarrow.parquet as pq
+import visualkeras
 
 #import visualkeras
 from sklearn.metrics import mean_squared_error
@@ -31,3 +32,4 @@ from functions.Data_analysis import plot_flash_time_distribution, sample_awkward
 from functions._2_PE_time_matrices import process_photoelectrons
 from functions._4_Image_creation_visualization import plot_image, image_creator_gen
 from functions._5_Regression_AI import split_train_test, train_and_predict
+
