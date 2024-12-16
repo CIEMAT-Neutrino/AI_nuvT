@@ -77,10 +77,10 @@ def train_and_predict(model, x_train, y_train, x_test, y_test, epochs=30, batch_
         weights_file, monitor='val_loss', verbose=0, save_best_only=True, mode='min'
     )
     early_stopping = EarlyStopping(
-        monitor='val_loss', patience=5, restore_best_weights=True
+        monitor='val_loss', patience=8, restore_best_weights=True
     )
     reduce_lr = ReduceLROnPlateau(
-        monitor='val_loss', factor=0.5, patience=3, min_lr=1e-6, verbose=1
+        monitor='val_loss', factor=0.5, patience=4, min_lr=1e-6, verbose=1
     )
 
     # Add all callbacks to the list
