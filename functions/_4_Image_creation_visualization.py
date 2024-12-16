@@ -158,3 +158,56 @@ def plot_image(image_data, event_idx, labels, groups, grid, figsize=(26, 10), us
 
 # With custom figure size
 # fig, axs = plot_image(image_min_4comp, event_idx=570, labels=labels, groups=groups, grid=(4, 4), figsize=(20, 8))
+
+
+def alberto_image(pe_matrix, time_matrix, *maps):
+
+    ch_z, ch_y = maps[0].shape  # Assuming all maps have the same shape
+    n_eventos = pe_matrix.shape[0]
+    
+    # Initialize empty matrices for the maps
+    pe_matrix_vis_map = np.zeros((n_eventos, ch_z, ch_y))
+    pe_matrix_vuv_map = np.zeros((n_eventos, ch_z, ch_y))
+
+    time_matrix_vis_map = np.zeros((n_eventos, ch_z, ch_y))
+    time_matrix_vuv_map = np.zeros((n_eventos, ch_z, ch_y))
+
+    # Fill the maps with the data
+    
+    
+    for i in range(n_eventos):
+        for j in range(ch_z):
+            for k in range(ch_y):
+                if maps[0][j][k] >= 0:
+                    pe_matrix_vis_map[i][j][k] = pe_matrix[i][maps[0][j][k]]
+                    time_matrix_vis_map[i][j][k] = time_matrix[i][maps[0][j][k]]
+                if maps[1][j][k] >= 0:
+                    pe_matrix_vuv_map[i][j][k] = pe_matrix[i][maps[1][j][k]]
+                    time_matrix_vuv_map[i][j][k] = time_matrix[i][maps[1][j][k]]
+
+    # Split and normalize the sensors of different radiation types into two layers
+    pe_matrix_vis_map = np.hsplit(pe_matrix_vis_map, 2) / np.max(pe_matrix)
+    pe_matrix_vuv_map = np.hsplit(pe_matrix_vuv_map, 2) / np.max(pe_matrix)
+
+    time_matrix_vis_map = np.hsplit(time_matrix_vis_map, 2) / np.max(time_matrix)
+    time_matrix_vuv_map = np.hsplit(time_matrix_vuv_map, 2) / np.max(time_matrix)
+
+    # Create the image combining all the layers
+    image = np.zeros((
+        np.shape(pe_matrix_vis_map[0])[0],
+        np.shape(pe_matrix_vis_map[0])[1],
+        np.shape(pe_matrix_vis_map[0])[2],
+        8
+    ))
+
+    image[:, :, :, 0] = pe_matrix_vis_map[0]
+    image[:, :, :, 1] = pe_matrix_vis_map[1]
+    image[:, :, :, 2] = pe_matrix_vuv_map[0]
+    image[:, :, :, 3] = pe_matrix_vuv_map[1]
+
+    image[:, :, :, 4] = time_matrix_vis_map[0]
+    image[:, :, :, 5] = time_matrix_vis_map[1]
+    image[:, :, :, 6] = time_matrix_vuv_map[0]
+    image[:, :, :, 7] = time_matrix_vuv_map[1]
+
+    return image
