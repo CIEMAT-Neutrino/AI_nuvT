@@ -30,6 +30,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 #import my own functions
 from functions.Data_analysis import plot_flash_time_distribution, sample_awkward_arrays, plot_variable_histograms
 from functions._2_PE_time_matrices import process_photoelectrons
-from functions._4_Image_creation_visualization import plot_image, image_creator_gen, alberto_image
+from functions._4_Image_creation_visualization import plot_image, plot_image2, image_creator_gen, alberto_image
 from functions._5_Regression_AI import split_train_test, train_and_predict
 
