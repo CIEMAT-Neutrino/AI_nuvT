@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-
+from matplotlib.patches import Patch
 
 import numpy as np
 
@@ -149,15 +149,96 @@ def plot_image(image_data, event_idx, labels, groups, grid, figsize=(26, 10), us
     
     plt.show()
 
-# Example usage:
-# Basic usage
-# fig, axs = plot_image(image_min_4comp, event_idx=570, labels=labels, groups=groups, grid=(4, 4))
+def plot_image2(image_data, event_idx, labels, groups, grid, figsize=(26, 10), use_log_scale=False, show_colorbar=True):
+    """
+    Plot created images with grouped color scaling.
+    
+    Parameters:
+    -----------
+    image_data : numpy.ndarray
+        4D array containing the image data
+    event_idx : int
+        Index of the event to plot
+    labels : list of str
+        Labels for each subplot
+    groups : list of list of int
+        Grouping of the image indices for shared scaling
+    grid : tuple
+        Tuple specifying the number of rows and columns (num_rows, num_columns)
+    figsize : tuple, optional
+        Figure size in inches (width, height) (default: (26, 10))
+    use_log_scale : bool, optional
+        Whether to use logarithmic color scaling (default: False)
+    show_colorbar : bool, optional
+        Whether to show colorbars for each subplot (default: False)
+    
+    Returns:
+    --------
+    fig : matplotlib.figure.Figure
+        The created figure
+    axs : numpy.ndarray
+        Array of subplot axes
+    """
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from matplotlib.colors import LogNorm
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-# With logarithmic scaling and colorbars
-# fig, axs = plot_image(image_min_4comp, event_idx=570, labels=labels, groups=groups, grid=(4, 4), use_log_scale=True, show_colorbar=True)
+    # Convert event index to array
+    event_index = np.array([event_idx])
+    
+    # Define grid dimensions
+    num_rows, num_columns = grid
 
-# With custom figure size
-# fig, axs = plot_image(image_min_4comp, event_idx=570, labels=labels, groups=groups, grid=(4, 4), figsize=(20, 8))
+    # Create figure and axes
+    fig, axs = plt.subplots(num_rows, num_columns, figsize=figsize)
+    axs = axs.flatten()
+    
+    # Set up colormap
+    cmap = plt.cm.Blues.copy()
+    cmap.set_bad(color='white')
+    
+    # Calculate scales for each group
+    group_scales = {}
+    for group in groups:
+        relevant_images = [np.squeeze(image_data[event_index[0], :, :, i]) for i in group]
+        if use_log_scale:
+            vmin = 1e-10  # Small positive number for log scale
+        else:
+            vmin = 0
+        vmax = max(np.max(img[img > 0]) if np.any(img > 0) else vmin for img in relevant_images)
+        group_scales[tuple(group)] = (vmin, vmax)
+    
+    # Plot images
+    for idx in range(len(labels)):
+        img = np.squeeze(image_data[event_index[0], :, :, idx])
+        masked_img = np.ma.masked_where(img <= 0, img)
+        
+        for group, (vmin, vmax) in group_scales.items():
+            if idx in group:
+                if use_log_scale:
+                    im = axs[idx].imshow(masked_img, cmap=cmap, 
+                                         norm=LogNorm(vmin=vmin, vmax=vmax))
+                else:
+                    im = axs[idx].imshow(masked_img, cmap=cmap, 
+                                         vmin=vmin, vmax=vmax)
+                break
+        
+        axs[idx].set_title(labels[idx], fontsize=20)
+        
+        # Add individual colorbar if requested
+        if show_colorbar:
+            divider = make_axes_locatable(axs[idx])
+            cax = divider.append_axes("right", size="5%", pad=0.15)
+            plt.colorbar(im, cax=cax)
+        
+        # Remove ticks
+        axs[idx].set_xticks([])
+        axs[idx].set_yticks([])
+    
+    plt.tight_layout()
+    plt.show()
+
 
 
 def alberto_image(pe_matrix, time_matrix, *maps):
