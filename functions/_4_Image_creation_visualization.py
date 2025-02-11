@@ -50,6 +50,7 @@ def image_creator_gen(pe_matrix, time_matrix, *maps):
     # Create the final image with 2 channels per map (photoelectrons and time)
     image = np.zeros((n_events, int(ch_z / 2), ch_y, 2 * map_count * 2))
 
+
     # Populate the image's channels with the data from each map
     channel = 0
     for pe_mat, time_mat in zip(pe_matrices_map, time_matrices_map):
@@ -61,6 +62,180 @@ def image_creator_gen(pe_matrix, time_matrix, *maps):
 
     return image
 
+def image_creator_gen2(pe_matrix, time_matrix, *maps):
+    """
+    Generalized function to create an image based on an arbitrary number of maps.
+    
+    :param pe_matrix: A 2D or 3D array of photoelectron counts.
+    :param time_matrix: A 2D or 3D array of time values.
+    :param maps: Any number of maps used for spatial distributions (vis_map, vuv_map, etc.).
+    :return: An image array with channels corresponding to each map.
+    """
+    ch_z, ch_y = maps[0].shape  # Assuming all maps have the same shape
+    n_events = pe_matrix.shape[0]
+
+    # Create empty arrays to hold the results for each map
+    map_count = len(maps)
+    
+    pe_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    time_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+       # Process each map and normalize separately for two groups
+    for idx, map_ in enumerate(maps):
+        valid_map = (map_ >= 0) & (map_ < pe_matrix.shape[1])
+        
+        # Process each event for the current map
+        for i in range(n_events):
+            pe_matrices_map[idx][i][valid_map] = pe_matrix[i][map_[valid_map]]
+            time_matrices_map[idx][i][valid_map] = time_matrix[i][map_[valid_map]]
+
+        #NEW NORMALIZATION
+
+        # Normalize the first two maps (first eight channels) separately from the last two
+        if idx < 2:  # First group
+            pe_matrices_map[idx] /= np.max(pe_matrices_map[:2])
+            time_matrices_map[idx] /= np.max(time_matrices_map[:2])
+        else:  # Second group
+            pe_matrices_map[idx] /= np.max(pe_matrices_map[2:])
+            time_matrices_map[idx] /= np.max(time_matrices_map[2:])
+
+    # Split and scale matrices for each map
+    pe_matrices_map = [np.hsplit(pe_mat, 2) for pe_mat in pe_matrices_map]
+    time_matrices_map = [np.hsplit(time_mat, 2) for time_mat in time_matrices_map]
+
+    pe_image = np.zeros((n_events, int(ch_z / 2), ch_y, 2* map_count))
+    time_image = np.zeros((n_events, int(ch_z / 2), ch_y, 2* map_count))  
+    
+    # Populate the image's channels with the data from each map
+    channel = 0
+    for pe_mat, time_mat in zip(pe_matrices_map, time_matrices_map):
+        pe_image[:, :, :, channel] = pe_mat[0]
+        pe_image[:, :, :, channel + 1] = pe_mat[1]
+        time_image[:, :, :, channel] = time_mat[0]
+        time_image[:, :, :, channel + 1] = time_mat[1]
+        channel += 2
+
+    return pe_image, time_image
+
+
+def image_creator_gen3(pe_matrix, time_matrix, *maps):
+    """
+    Generalized function to create an image based on an arbitrary number of maps.
+    
+    :param pe_matrix: A 2D or 3D array of photoelectron counts.
+    :param time_matrix: A 2D or 3D array of time values.
+    :param maps: Any number of maps used for spatial distributions (vis_map, vuv_map, etc.).
+    :return: An image array with channels corresponding to each map.
+    """
+    ch_z, ch_y = maps[0].shape  # Assuming all maps have the same shape
+    n_events = pe_matrix.shape[0]
+
+    # Create empty arrays to hold the results for each map
+    map_count = len(maps)
+    
+    pe_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    time_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    time_matrices_map_inv = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    
+    # Process each map and normalize separately for two groups
+    for idx, map_ in enumerate(maps):
+        valid_map = (map_ >= 0) & (map_ < pe_matrix.shape[1])
+        
+        # Process each event for the current map
+        for i in range(n_events):
+            pe_matrices_map[idx][i][valid_map] = pe_matrix[i][map_[valid_map]]
+            time_matrices_map[idx][i][valid_map] = time_matrix[i][map_[valid_map]]
+            
+            # Get max time for this event
+            max_time = np.max(time_matrices_map[idx][i])  
+            
+            # Get min nonzero time, but check if there are any nonzero values first
+            nonzero_times = time_matrices_map[idx][i][time_matrices_map[idx][i] > 0]
+            min_time = np.min(nonzero_times) if nonzero_times.size > 0 else 0  # Avoid error
+            
+            # Apply transformation while ensuring zeros don't distort the range
+            time_matrices_map_inv[idx][i] = np.where(
+                time_matrices_map[idx][i] != 0,
+                max_time - time_matrices_map[idx][i] + min_time,  # Shift values
+                0  # Ensure zeros remain zeros
+            )
+    
+        pe_matrices_map[idx] /= np.max(pe_matrices_map[idx])  # Normalizar cada mapa de PE individualmente
+    
+    # Compute the global max across all time matrices
+    global_max_time = max(np.max(time_mat) for time_mat in time_matrices_map_inv)
+
+    # Normalize using the global max
+    for idx in range(len(time_matrices_map_inv)):
+        time_matrices_map_inv[idx] /= global_max_time
+
+    # Split and scale matrices for each map
+    pe_matrices_map = [np.hsplit(pe_mat, 2) for pe_mat in pe_matrices_map]
+    time_matrices_map = [np.hsplit(time_mat, 2) for time_mat in time_matrices_map]
+
+    # Create the final image with 2 channels per map (photoelectrons and time)
+    image = np.zeros((n_events, int(ch_z / 2), ch_y, 2 * map_count * 2))
+    pe_image = np.zeros((n_events, int(ch_z / 2), ch_y, 2* map_count))
+    time_image = np.zeros((n_events, int(ch_z / 2), ch_y, 2* map_count))  
+
+    # Populate the image's channels with the data from each map
+    channel = 0
+    for pe_mat, time_mat in zip(pe_matrices_map, time_matrices_map):
+        pe_image[:, :, :, channel] = pe_mat[0]
+        pe_image[:, :, :, channel + 1] = pe_mat[1]
+        time_image[:, :, :, channel] = time_mat[0]
+        time_image[:, :, :, channel + 1] = time_mat[1]
+        channel += 2
+
+    return pe_image, time_image
+
+
+def select_non_empty_half(matrix, method="max"):
+    """
+    Selects the half of the matrix (left or right) that contains more meaningful data.
+
+    The selection is based on a specified method:
+    - "max": Chooses the half with the highest maximum value.
+    - "sum": Chooses the half with the highest total sum of values.
+    - "nonzero": Chooses the half with the most nonzero elements.
+    - "mean_top": Chooses the half with the highest mean of the top N values.
+
+    Parameters:
+    -----------
+    matrix : np.ndarray
+        The input 2D or 3D matrix (e.g., (n_events, height, width)).
+    method : str, optional
+        The selection criterion ("max", "sum", "nonzero", "mean_top"), by default "max".
+
+    Returns:
+    --------
+    np.ndarray
+        The selected half of the matrix.
+    """
+
+    # Ensure the matrix has an even number of columns (width)
+    if matrix.shape[1] % 2 != 0:
+        raise ValueError("The matrix width must be evenly divisible by 2 to split it equally.")
+
+    # Split matrix into left and right halves
+    left_half, right_half = np.hsplit(matrix, 2)
+
+    if method == "max":
+        left_score = np.max(left_half)
+        right_score = np.max(right_half)
+    elif method == "sum":
+        left_score = np.sum(left_half)
+        right_score = np.sum(right_half)
+    elif method == "nonzero":
+        left_score = np.count_nonzero(left_half)
+        right_score = np.count_nonzero(right_half)
+    elif method == "mean_top":
+        top_n = 5  # Number of top values to consider
+        left_score = np.mean(np.sort(left_half.flatten())[-top_n:])
+        right_score = np.mean(np.sort(right_half.flatten())[-top_n:])
+    else:
+        raise ValueError(f"Invalid method '{method}'. Choose from 'max', 'sum', 'nonzero', or 'mean_top'.")
+
+    return left_half if left_score >= right_score else right_half
 
 
 def plot_image(image_data, event_idx, labels, groups, grid, figsize=(26, 10), use_log_scale=False, show_colorbar=False):
