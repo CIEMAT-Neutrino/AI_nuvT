@@ -1,7 +1,0 @@
-corrected_1: means nuvT and f_ophit_t corrected by the ToF (outside & inside), e.g. pe_matrix_corrected_1
-corrected_2: means nuvT and f_ophit_t corrected by the ToF (outside & inside) and f_ophit_t corrected addtionaly 
-by ak.flatten(nuvT_c), e.g. pe_matrix_corrected_2
-corrected_3: same has corrected_2 but with nuvT bunched -- np.mod(corrected_2, bunch_separation)
-corrected_4: bunched but centered using a constant -- np.mod(corrected_2 + 7, bunch_separation)
-corrected_5: means nuvT and f_ophit_t corrected by the ToF (outside & inside) & nuvT centered-bunched
-non_corrected: w/o any correction
