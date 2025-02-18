@@ -104,14 +104,14 @@ def image_creator_gen_inv(pe_matrix, time_matrix, *maps):
                 0  # Ensure zeros remain zeros
             )
     
-        pe_matrices_map[idx] /= np.max(pe_matrices_map[idx])  # Normalizar cada mapa de PE individualmente
-    
-    # Compute the global max across all time matrices
-    global_max_time = max(np.max(time_mat) for time_mat in time_matrices_map_inv)
+        # Normalize the first two maps (first eight channels) separately from the last two
+        if idx < 2:  # First group
+            pe_matrices_map[idx] /= np.max(pe_matrices_map[:2])
+            time_matrices_map_inv[idx] /= np.max(time_matrices_map_inv[:2])
+        else:  # Second group
+            pe_matrices_map[idx] /= np.max(pe_matrices_map[2:])
+            time_matrices_map_inv[idx] /= np.max(time_matrices_map_inv[2:])
 
-    # Normalize using the global max
-    for idx in range(len(time_matrices_map_inv)):
-        time_matrices_map_inv[idx] /= global_max_time
 
     # Split and scale matrices for each map
     pe_matrices_map = [np.hsplit(pe_mat, 2) for pe_mat in pe_matrices_map]
@@ -130,6 +130,168 @@ def image_creator_gen_inv(pe_matrix, time_matrix, *maps):
         channel += 4
 
     return image
+
+
+import numpy as np
+
+def image_creator_gen_inv_nuevo(pe_matrix, time_matrix, *maps):
+    """
+    Función generalizada para crear una imagen a partir de un número arbitrario de mapas.
+
+    :param pe_matrix: Array 2D o 3D de cuentas de fotoelectrones.
+    :param time_matrix: Array 2D o 3D de valores de tiempo.
+    :param maps: Cualquier cantidad de mapas usados para distribuciones espaciales (vis_map, vuv_map, etc.).
+    :return: Array de imagen con 2 canales por mapa (fotoelectrones y tiempo).
+    """
+    ch_z, ch_y = maps[0].shape  # Se asume que todos los mapas tienen la misma forma
+    n_events = pe_matrix.shape[0]
+    map_count = len(maps)
+
+    # Crear arrays vacíos para almacenar los resultados por mapa
+    pe_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    time_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    time_matrices_map_inv = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    
+    # Procesar cada mapa y normalizar de forma separada para dos grupos
+    for idx, map_ in enumerate(maps):
+        valid_map = (map_ >= 0) & (map_ < pe_matrix.shape[1])
+        
+        # Procesar cada evento para el mapa actual
+        for i in range(n_events):
+            pe_matrices_map[idx][i][valid_map] = pe_matrix[i][map_[valid_map]]
+            time_matrices_map[idx][i][valid_map] = time_matrix[i][map_[valid_map]]
+            
+            # Obtener el tiempo máximo para este evento
+            max_time = np.max(time_matrices_map[idx][i])
+            
+            # Obtener el mínimo de los tiempos no nulos, si existen
+            nonzero_times = time_matrices_map[idx][i][time_matrices_map[idx][i] > 0]
+            min_time = np.min(nonzero_times) if nonzero_times.size > 0 else 0
+            
+            # Aplicar transformación asegurando que los ceros se mantengan
+            time_matrices_map_inv[idx][i] = np.where(
+                time_matrices_map[idx][i] != 0,
+                max_time - time_matrices_map[idx][i] + min_time,  # Se desplazan los valores
+                0
+            )
+    
+        # Normalizar separadamente: los dos primeros mapas (primer grupo) y el resto (segundo grupo)
+        if idx < 2:  # Primer grupo
+            pe_matrices_map[idx] /= np.max([np.max(x) for x in pe_matrices_map[:2]])
+            time_matrices_map_inv[idx] /= np.max([np.max(x) for x in time_matrices_map_inv[:2]])
+        else:  # Segundo grupo
+            pe_matrices_map[idx] /= np.max([np.max(x) for x in pe_matrices_map[2:]])
+            time_matrices_map_inv[idx] /= np.max([np.max(x) for x in time_matrices_map_inv[2:]])
+
+    # Dividir horizontalmente cada matriz en dos mitades
+    pe_matrices_map = [np.hsplit(pe_mat, 2) for pe_mat in pe_matrices_map]
+    time_matrices_map_inv = [np.hsplit(time_mat, 2) for time_mat in time_matrices_map_inv]
+
+    # Crear la imagen final: 2 canales por mapa (PE y tiempo)
+    image = np.zeros((n_events, int(ch_z / 2), ch_y, 2 * map_count))
+    
+    channel = 0
+    for pe_halves, time_halves in zip(pe_matrices_map, time_matrices_map_inv):
+        # Seleccionar la mitad con mayor cantidad de datos para los PE
+        count_pe0 = np.count_nonzero(pe_halves[0])
+        count_pe1 = np.count_nonzero(pe_halves[1])
+        pe_selected = pe_halves[0] if count_pe0 >= count_pe1 else pe_halves[1]
+        
+        # Seleccionar la mitad con mayor cantidad de datos para el tiempo
+        count_time0 = np.count_nonzero(time_halves[0])
+        count_time1 = np.count_nonzero(time_halves[1])
+        time_selected = time_halves[0] if count_time0 >= count_time1 else time_halves[1]
+        
+        # Asignar los datos seleccionados a la imagen final
+        image[:, :, :, channel] = pe_selected
+        image[:, :, :, channel + 1] = time_selected
+        channel += 2
+
+    return image
+
+
+import numpy as np
+
+def image_creator_gen_inv_nuevo2(pe_matrix, time_matrix, *maps):
+    """
+    Función generalizada para crear una imagen a partir de un número arbitrario de mapas.
+
+    :param pe_matrix: Array 2D o 3D de cuentas de fotoelectrones.
+    :param time_matrix: Array 2D o 3D de valores de tiempo.
+    :param maps: Cualquier cantidad de mapas usados para distribuciones espaciales (vis_map, vuv_map, etc.).
+    :return: Array de imagen con 2 canales por mapa (fotoelectrones y tiempo).
+    """
+    ch_z, ch_y = maps[0].shape  # Se asume que todos los mapas tienen la misma forma
+    n_events = pe_matrix.shape[0]
+    map_count = len(maps)
+
+    # Crear arrays vacíos para almacenar los resultados por mapa
+    pe_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    time_matrices_map = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    time_matrices_map_inv = [np.zeros((n_events, ch_z, ch_y)) for _ in range(map_count)]
+    
+    # Procesar cada mapa y normalizar de forma separada para dos grupos
+    for idx, map_ in enumerate(maps):
+        valid_map = (map_ >= 0) & (map_ < pe_matrix.shape[1])
+        
+        # Procesar cada evento para el mapa actual
+        for i in range(n_events):
+            pe_matrices_map[idx][i][valid_map] = pe_matrix[i][map_[valid_map]]
+            time_matrices_map[idx][i][valid_map] = time_matrix[i][map_[valid_map]]
+            
+            # Obtener el tiempo máximo para este evento
+            max_time = np.max(time_matrices_map[idx][i])
+            
+            # Obtener el mínimo de los tiempos no nulos, si existen
+            nonzero_times = time_matrices_map[idx][i][time_matrices_map[idx][i] > 0]
+            min_time = np.min(nonzero_times) if nonzero_times.size > 0 else 0
+            
+            # Aplicar transformación asegurando que los ceros se mantengan
+            time_matrices_map_inv[idx][i] = np.where(
+                time_matrices_map[idx][i] != 0,
+                max_time - time_matrices_map[idx][i] + min_time,  # Se desplazan los valores
+                0
+            )
+    
+        # Normalizar separadamente: los dos primeros mapas (primer grupo) y el resto (segundo grupo)
+        if idx < 2:  # Primer grupo
+            pe_max = np.max([np.max(x) for x in pe_matrices_map[:2]])
+            time_max = np.max([np.max(x) for x in time_matrices_map_inv[:2]])
+        else:  # Segundo grupo
+            pe_max = np.max([np.max(x) for x in pe_matrices_map[2:]])
+            time_max = np.max([np.max(x) for x in time_matrices_map_inv[2:]])
+            
+        pe_matrices_map[idx] = pe_matrices_map[idx] / pe_max if pe_max != 0 else pe_matrices_map[idx]
+        time_matrices_map_inv[idx] = time_matrices_map_inv[idx] / time_max if time_max != 0 else time_matrices_map_inv[idx]
+
+    # Dividir horizontalmente cada matriz en dos mitades
+    pe_matrices_map = [np.hsplit(pe_mat, 2) for pe_mat in pe_matrices_map]
+    time_matrices_map_inv = [np.hsplit(time_mat, 2) for time_mat in time_matrices_map_inv]
+
+    # Crear la imagen final: 2 canales por mapa (PE y tiempo)
+    # NOTA: aquí cada "evento" tendrá asignada la mitad seleccionada de su mapa.
+    image = np.zeros((n_events, int(ch_z / 2), ch_y, 2 * map_count))
+    
+    # Ahora, para cada mapa, hacer la selección por evento
+    for m, (pe_halves, time_halves) in enumerate(zip(pe_matrices_map, time_matrices_map_inv)):
+        for i in range(n_events):
+            # Para PE: seleccionar la mitad con mayor cantidad de datos para este evento
+            count_pe0 = np.count_nonzero(pe_halves[0][i])
+            count_pe1 = np.count_nonzero(pe_halves[1][i])
+            pe_selected = pe_halves[0][i] if count_pe0 >= count_pe1 else pe_halves[1][i]
+            
+            # Para tiempo: seleccionar la mitad con mayor cantidad de datos para este evento
+            count_time0 = np.count_nonzero(time_halves[0][i])
+            count_time1 = np.count_nonzero(time_halves[1][i])
+            time_selected = time_halves[0][i] if count_time0 >= count_time1 else time_halves[1][i]
+            
+            # Asignar los datos seleccionados a la imagen final
+            image[i, :, :, 2 * m] = pe_selected
+            image[i, :, :, 2 * m + 1] = time_selected
+
+    return image
+
+
 
 
 def image_creator_gen_2images(pe_matrix, time_matrix, *maps):
