@@ -17,3 +17,6 @@ The goal of this project is to develop a neural network that uses the scintillat
 
 # Author
 Sergio Domínguez Vidales
+
+# Presentation of results using this code
+https://docs.google.com/presentation/d/1ASM9SbAAN1opDrsNxzyTJngjeZ-pBoic2WIfSnaSylY/edit?usp=sharing
