@@ -93,7 +93,7 @@ def train_and_predict(model, x_train, y_train, x_test, y_test, epochs=30, batch_
         epochs=epochs,
         batch_size=batch_size,
         callbacks=callbacks,
-        validation_data=(x_test, y_test),
+        validation_data=(x_val, y_val),
         verbose=1
     )
 
