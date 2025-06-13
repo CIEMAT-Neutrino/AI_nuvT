@@ -1,8 +1,9 @@
+*.keras
 *.npy
 *.pyc
 *.parquet
 __pycache__/
 *.json
-*.keras
+
 
 
