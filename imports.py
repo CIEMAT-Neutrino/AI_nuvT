@@ -7,11 +7,11 @@ import collections
 from random import randint
 import pyarrow as pa
 import pyarrow.parquet as pq
-import visualkeras
+#import visualkeras
 
 #import visualkeras
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import r2_score
+#from sklearn.metrics import mean_squared_error
+#from sklearn.metrics import r2_score
 
 #typical libraries
 import matplotlib.pyplot as plt

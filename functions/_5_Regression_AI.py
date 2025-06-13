@@ -52,7 +52,7 @@ def split_train_test(image, hit_nuvT_filtered, test_ratio=0.50):
 
 from tensorflow.keras.callbacks import ModelCheckpoint,EarlyStopping, ReduceLROnPlateau
 
-def train_and_predict(model, x_train, y_train, x_test, y_test, epochs=30, batch_size=32):
+def train_and_predict(model, x_train, y_train, x_val, y_val, epochs=30, batch_size=32):
     """
     Trains the model and predicts the output.
 
@@ -93,7 +93,7 @@ def train_and_predict(model, x_train, y_train, x_test, y_test, epochs=30, batch_
         epochs=epochs,
         batch_size=batch_size,
         callbacks=callbacks,
-        validation_data=(x_test, y_test),
+        validation_data=(x_val, y_val),
         verbose=1
     )
 
@@ -101,6 +101,6 @@ def train_and_predict(model, x_train, y_train, x_test, y_test, epochs=30, batch_
     model.load_weights(weights_file)
 
     # Make predictions on the test set
-    y_pred = model.predict(x_test)
+    y_pred = model.predict(x_val)
 
     return y_pred, history
